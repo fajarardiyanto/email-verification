@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,4 +26,8 @@ func GenerateRandomString(n int) string {
 		sb.WriteByte(letter[idx])
 	}
 	return sb.String()
+}
+
+func Message(status bool, message string) gin.H {
+	return gin.H{"status": status, "message": message}
 }
