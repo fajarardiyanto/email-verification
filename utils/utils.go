@@ -28,6 +28,6 @@ func GenerateRandomString(n int) string {
 	return sb.String()
 }
 
-func Message(status bool, message string) gin.H {
+func MessageError(status bool, message string) gin.H {
 	return gin.H{"status": status, "message": message}
 }
