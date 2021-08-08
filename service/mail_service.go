@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/d-vignesh/go-jwt-auth/utils"
 	"github.com/hashicorp/go-hclog"
+	"os"
 
 	"github.com/sendgrid/sendgrid-go"
 	"github.com/sendgrid/sendgrid-go/helpers/mail"
@@ -35,16 +35,9 @@ type Mail struct {
 	data    *MailData
 }
 
-type SGMailService struct {
-	logger  hclog.Logger
-	configs *utils.Configurations
-}
+type ServiceMail struct{}
 
-func NewSGMailService(logger hclog.Logger, configs *utils.Configurations) *SGMailService {
-	return &SGMailService{logger, configs}
-}
-
-func (ms *SGMailService) CreateMail(mr *Mail) []byte {
+func (ms *ServiceMail) CreateMail(mr *Mail) []byte {
 
 	m := mail.NewV3Mail()
 
@@ -52,9 +45,9 @@ func (ms *SGMailService) CreateMail(mr *Mail) []byte {
 	m.SetFrom(from)
 
 	if mr.mtype == MailConfirmation {
-		m.SetTemplateID(ms.configs.MailVerifTemplateID)
+		m.SetTemplateID(os.Getenv("MAIL_VERIFICATION_TEMPLATE_ID"))
 	} else if mr.mtype == PassReset {
-		m.SetTemplateID(ms.configs.PassResetTemplateID)
+		m.SetTemplateID(os.Getenv("PASSWORD_RESET_TEMPLATE_ID"))
 	}
 
 	p := mail.NewPersonalization()
@@ -73,22 +66,22 @@ func (ms *SGMailService) CreateMail(mr *Mail) []byte {
 	return mail.GetRequestBody(m)
 }
 
-func (ms *SGMailService) SendMail(mr *Mail) error {
+func (ms *ServiceMail) SendMail(mr *Mail) error {
 
-	request := sendgrid.GetRequest(ms.configs.SendGridApiKey, "/v3/mail/send", "https://api.sendgrid.com")
+	request := sendgrid.GetRequest(os.Getenv("SENDGRID_API_KEY"), "/v3/mail/send", "https://api.sendgrid.com")
 	request.Method = "POST"
 	var Body = ms.CreateMail(mr)
 	request.Body = Body
 	response, err := sendgrid.API(request)
 	if err != nil {
-		ms.logger.Error("unable to send mail", "error", err)
+		hclog.Default().Error("unable to send mail", "error", err)
 		return err
 	}
-	ms.logger.Info("mail sent successfully", "sent status code", response.StatusCode)
+	hclog.Default().Info("mail sent successfully", "sent status code", response.StatusCode)
 	return nil
 }
 
-func (ms *SGMailService) NewMail(from string, to []string, subject string, mailType MailType, data *MailData) *Mail {
+func (ms *ServiceMail) NewMail(from string, to []string, subject string, mailType MailType, data *MailData) *Mail {
 	return &Mail{
 		from:    from,
 		to:      to,
