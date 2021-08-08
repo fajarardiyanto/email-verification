@@ -11,4 +11,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/qiniu/qmgo v0.9.4
 	github.com/sendgrid/sendgrid-go v3.7.2+incompatible
+	github.com/spf13/viper v1.7.1 // indirect
+	go.mongodb.org/mongo-driver v1.5.1 // indirect
+	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 )
